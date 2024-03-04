@@ -1,0 +1,300 @@
+import random
+import csv
+import copy
+import sys
+
+
+def recursive_function(term1, term2):
+    #Separate each term into 2 a,b,c,d
+    term1 = str(int(term1))
+    term2 = str(int(term2))
+    n = len(term1)//2
+    a = term1[:len(term1)-n]
+    b = term1[len(term1)-n:]
+    c = term2[:len(term2)-n]
+    d = term2[len(term2)-n:]
+
+    #Step 1: Multiply a by c
+    if len(a) > 2 or len(c) > 2:
+        ac = recursive_function(a,c)
+    else:
+        ac = int(a) * int(c)
+    #Step 2: Multiply b by d
+    if len(b) > 2 or len(d) > 2:
+        bd = recursive_function(b,d)
+    else:
+        bd = int(b) * int(d)
+    #Step 3: compute (a + b)(c+d)
+    ab = str(int(a) + int(b))
+    cd = str(int(c) + int(d))
+    if len(ab) > 2 or len(cd) > 2:
+        abcd = recursive_function(ab,cd)
+    else:
+        abcd = int(ab) * int(cd)
+    abcd = int(abcd - ac - bd)
+    x = (10**n)**2*ac + 10**(n)*abcd + bd
+    return int(x)
+
+    #product of term1 *  term2
+
+#print(recursive_function(3141592653589793238462643383279502884197169399375105820974944592,2718281828459045235360287471352662497757247093699959574966967627))
+
+def IntegerArray():
+    file = open("IntegerArray.txt")
+    A = [0]*100000
+    #A = [6,5,4,3,2,1]
+    for i, line in enumerate(file.readlines()):
+        A[i] = int(line)
+    A = merge_sort(A,0)
+    print(A)
+
+def merge_sort(A,inversions):
+    # Merge Sort
+    n = len(A)
+    if n == 1:
+        return (A,0)
+        # sort the left half
+    D = [0]*n
+    B = merge_sort(A[:n//2],0)
+    inversions += B[1]
+    B = B[0]
+        # sort the right half
+    C = merge_sort(A[n//2:],0)
+    inversions += C[1]
+    C = C[0]
+    # merge
+    i = j = 0
+
+    for k in range(n):
+        if i == len(B):
+            D[k] = C[j]
+            j += 1
+        elif j == len(C):
+            D[k] = B[i]
+            i += 1
+        elif B[i] < C[j]:
+            D[k] = B[i]
+            i += 1
+        elif B[i] > C[j]:
+            inversions += (len(B[i:]))
+            D[k] = C[j]
+            j += 1
+    return D, inversions
+
+def quick_sort(A,comparisons):
+    #select first value in array as pivot
+
+    if len(A) <= 1:
+        return A,0
+    else:
+        comparisons = len(A) - 1
+    j = 1
+    #to change pivot point, swap pivot with first index of array
+
+    #Select pivot point based on 1st middle last
+    if len(A)%2 == 0:
+        mid = A[len(A)//2-1]
+        mid_index = len(A)//2 - 1
+    else:
+        mid = A[len(A)//2]
+        mid_index = len(A)//2
+    array = [A[0],mid,A[-1]]
+    array_index = [0, mid_index, -1]
+    array = quick_sort_median(array,array_index)
+    #sort array
+    #array[1][1] = -1
+
+    pivot = A[array[1][1]]
+    A[array[1][1]] = A[0]
+    A[0] = pivot
+    for i in range(1,len(A)):
+        if A[i] < A[0]:
+            #place to left of A[0] and do swap
+            x = A[j]
+            A[j] = A[i]
+            A[i] = x
+            j += 1
+    x = A[0]
+    A[0] = A[j-1]
+    A[j-1] = x
+
+    #sort right half
+    B = quick_sort(A[j:],0)
+    comparisons += B[1]
+    #sort left half
+    C = quick_sort(A[:j-1],0)
+    comparisons += C[1]
+    return C[0]+[A[j-1]]+B[0], comparisons
+
+
+def quick_sort_median(A,A_int):
+    # select first value in array as pivot
+
+    if len(A) <= 1:
+        return A, A_int
+    j = 1
+    # to change pivot point, swap pivot with first index of array
+    for i in range(1, len(A)):
+        if A[i] < A[0]:
+            # place to left of A[0] and do swap
+            x = A[j]
+            y = A_int[j]
+            A[j] = A[i]
+            A_int[j] = A_int[i]
+            A[i] = x
+            A_int[i] = y
+            j += 1
+    # sort right half
+    B = quick_sort_median(A[j:], A_int[j:])
+
+    # sort left half
+    C = quick_sort_median(A[1:j], A_int[1:j])
+
+    return C[0] + [A[0]] + B[0], C[1] + [A_int[0]] + B[1]
+
+
+
+def contraction(foo):
+#pick random edge
+    start = random.choice(list(foo.keys()))
+    #start = 1
+    end = foo[start][0]
+    if len(foo) <=  2:
+        edges = len(foo[start])             #end = 48
+        return edges #contract it
+    #This means find and replace all refrences of one and replace with another. Except for if it occurs on itself.
+
+    foo[end] = foo[end] + foo[start]
+    for i in range(len(foo[end])):
+        if foo[end][i] == start:
+            foo[end][i] = -1
+    for i in foo[start]:
+        for j in range(len(foo[i])):
+            if foo[i][j] == start:
+                foo[i][j] = end
+
+    foo[end] = [j for j in foo[end] if int(j) > 0 and j != end]
+    foo.pop(start)
+    edges = contraction(foo)
+    return edges
+    #delete any self loops
+
+def binary_search(A, target):
+    #pick middle
+    if A[len(A)//2][0] == target:
+        #walk backwards until finding first instance
+        x = A[len(A)//2][0]
+        count = -1
+        if A[0][0] == target:
+            return 0
+        while x == target and len(A)//2 - count > 0:
+            count += 1
+            x = A[len(A)//2 - count][0]
+        return len(A)//2 - count +1
+    elif A[len(A)//2][0] < target:
+        #look in second half
+        if len(A) == 1:
+            return "Not found"
+        return binary_search(A[len(A)//2:],target) + len(A)//2
+
+    else:
+        if len(A) == 1:
+            return "Not found"
+        return binary_search(A[:len(A)//2],target)
+import time
+def DFS(A,start_node,explored,n):
+    current_node = start_node
+    stack = [current_node]
+    if explored[current_node] != 0:
+        return explored, n
+    else:
+        explored[current_node] = -1
+    # Move to next node
+    i = 0
+    j = -1
+    while stack:
+        try:
+            placeholder_node = A[current_node][i]
+            # Add to stack
+            if explored[placeholder_node] == 0:
+                stack += [placeholder_node]
+                current_node = placeholder_node
+                explored[current_node] = -1
+                i = 0
+            else:
+                i += 1
+            # repeat until can't find next node
+        except:
+            #Retreat backwards mark order
+            n += 1
+            explored[current_node] = n
+
+            stack = stack[:-1]
+            i = 0
+            if len(stack) > 0:
+                current_node = stack[j]
+    # Retreat backwards a step
+    return explored, n
+
+
+
+
+
+    #If there is nowhere to go, mark count and increment count then  return
+# How to mark as read?
+
+
+import csv
+import copy
+def read_inputs():
+    A = {}
+    B = {}
+    count = set()
+    with open('Strongest_connections.txt', 'r') as f:
+        for row in csv.reader(f, delimiter=' '):
+            if int(row[0]) in A:
+                A[int(row[0])] += [int(row[1])]
+            else:
+                A[int(row[0])] = [int(row[1])]
+            if int(row[1]) in B:
+                B[int(row[1])] += [int(row[0])]
+            else:
+                B[int(row[1])] = [int(row[0])]
+            count.add(row[0])
+            count.add(row[1])
+    return A, B, len(count)
+
+
+
+
+#A = [[1,2],[1,4],[2,3],[4,3]]
+#A = {1:[4],2:[8], 3:[6], 4:[7], 5:[2],6:[9],7:[1],8:[5,6],9:[3,7]}
+#B = {4:[1],8:[2],6:[3,8],7:[4,9],2:[5],9:[6],1:[7],5:[8],3:[9]}
+A,B,count = read_inputs()
+explored = [0] * 875715
+explored = {i:0 for i in range(1,count+1)}
+def strong_components(A,B,explored,const_nodes):
+    num_nodes = 0
+    for i in range(1,const_nodes+1):
+        explored, num_nodes = DFS(B,i,explored, num_nodes) #eplored{node:n}
+    explored = {v: k for k, v in explored.items()}#explored{n:node}
+    print(explored)
+    final = [0]*(const_nodes+1)
+    num_nodes = 0
+    x = 0
+    output = []
+    for i in range(const_nodes, 0, -1):
+        final, num_nodes = DFS(A,explored[i],final, num_nodes)
+        output += [num_nodes - x]
+        x = num_nodes
+        print(num_nodes)
+    output = sorted(output)
+    print(output)
+
+
+#Create reversed A graph
+#Test
+import time
+start_time = time.time()
+strong_components(A,B,explored,count)
+print("--- %s seconds ---" % (time.time() - start_time))

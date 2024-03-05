@@ -270,10 +270,11 @@ def read_inputs():
 #A = [[1,2],[1,4],[2,3],[4,3]]
 #A = {1:[4],2:[8], 3:[6], 4:[7], 5:[2],6:[9],7:[1],8:[5,6],9:[3,7]}
 #B = {4:[1],8:[2],6:[3,8],7:[4,9],2:[5],9:[6],1:[7],5:[8],3:[9]}
-A,B,count = read_inputs()
-explored = [0] * 875715
-explored = {i:0 for i in range(1,count+1)}
-def strong_components(A,B,explored,const_nodes):
+
+def strong_components():
+    A, B, count = read_inputs()
+    explored = [0] * 875715
+    explored = {i: 0 for i in range(1, count + 1)}
     num_nodes = 0
     for i in range(1,const_nodes+1):
         explored, num_nodes = DFS(B,i,explored, num_nodes) #eplored{node:n}
@@ -292,9 +293,50 @@ def strong_components(A,B,explored,const_nodes):
     print(output)
 
 
-#Create reversed A graph
-#Test
+def dijkstra_read_inputs():
+    G = {}
+    A = {}
+    with open("dijkstra.txt") as f:
+        for row in csv.reader(f,delimiter='\t'):
+            G[int(row[0])] = [[int(i) for i in row[1].split(",")]]
+            for i in range(2,len(row)):
+                if row[i] != '':
+                    G[int(row[0])] += [[int(j) for j in row[i].split(",")]]
+            #G[int(row[0])] = [int(G[int(row[0])][i]) for i in range(len(G[int(row[0])]))]
+    return G
+def dijkstra(s,t,num_nodes):
+
+    G = dijkstra_read_inputs()
+    #G = {1:[[2,1],[4,3]],2:[[3,3],[1,1],[4,1],[5,1]],4:[[3,2],[1,3],[2,1]],3:[[2,3],[4,2],[5,1]],5:[[2,1],[3,1]]}
+    A = {s:0}
+    B = {s:'1'}
+    #find shortest path from s to t
+    #similar to breadth first search
+    #Need explored? or A
+    greedy_score = 10000000
+    end_node = 0
+    start_node = 0
+    while t not in A:
+        for i in A:
+            #check greedy scores of all i paths
+            for j in G[i]:
+                if j[1] + A[i] < greedy_score and j[0] not in A: #Add to A
+                    greedy_score = j[1]
+                    end_node = j[0]
+                    start_node = i
+        A[end_node] = greedy_score + A[start_node]
+        B[end_node] = B[start_node] +','+ str(end_node)
+        #G[start_node] = [x for x in G[start_node] if x[0] != end_node]
+        greedy_score = 10000000
+    return A
+    #use Dijkstra greedy score to compute which vertex to add next
+
+
 import time
 start_time = time.time()
-strong_components(A,B,explored,count)
+x = ''
+for t in [7,37,59,82,99,115,133,165,188,197]:
+    x += str(dijkstra(1,t,200)[t])+','
+#x = dijkstra(1,11,200)
+print(x)
 print("--- %s seconds ---" % (time.time() - start_time))

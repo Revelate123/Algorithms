@@ -309,7 +309,7 @@ def dijkstra(s,t,num_nodes):
     G = dijkstra_read_inputs()
     #G = {1:[[2,1],[4,3]],2:[[3,3],[1,1],[4,1],[5,1]],4:[[3,2],[1,3],[2,1]],3:[[2,3],[4,2],[5,1]],5:[[2,1],[3,1]]}
     A = {s:0}
-    B = {s:'1'}
+    B = {s:str(s)}
     #find shortest path from s to t
     #similar to breadth first search
     #Need explored? or A
@@ -318,13 +318,19 @@ def dijkstra(s,t,num_nodes):
     start_node = 0
     while t not in A:
         for i in A:
+            if i == 112:
+                pass
+            if i == 26:
+                pass
             #check greedy scores of all i paths
             for j in G[i]:
                 if j[1] + A[i] < greedy_score and j[0] not in A: #Add to A
-                    greedy_score = j[1]
+                    greedy_score = j[1] + A[i]
                     end_node = j[0]
                     start_node = i
-        A[end_node] = greedy_score + A[start_node]
+        if end_node == 18:
+            pass
+        A[end_node] = greedy_score
         B[end_node] = B[start_node] +','+ str(end_node)
         #G[start_node] = [x for x in G[start_node] if x[0] != end_node]
         greedy_score = 10000000
@@ -337,6 +343,12 @@ start_time = time.time()
 x = ''
 for t in [7,37,59,82,99,115,133,165,188,197]:
     x += str(dijkstra(1,t,200)[t])+','
-#x = dijkstra(1,11,200)
+#x = dijkstra(1,37,200)
 print(x)
+x=''
+for t in [7,37,59,82,99,115,133,165,188,197]:
+    x += str(dijkstra(t,1,200)[1])+','
+
+print(x)
+
 print("--- %s seconds ---" % (time.time() - start_time))

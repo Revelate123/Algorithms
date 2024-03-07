@@ -337,18 +337,129 @@ def dijkstra(s,t,num_nodes):
     return A
     #use Dijkstra greedy score to compute which vertex to add next
 
+def heap_insert(heap, value, value_index,min_heap):
+    #append to end of heap
+    heap.append(value)
+    #Maintain heap property
+    if min_heap == True:
+        while heap[(value_index)//2] > value:
+            #Swap values
+            x = heap[(value_index)//2]
+            heap[(value_index) // 2] = value
+            heap[value_index] = x
+            value_index = (value_index)//2
+    else:
+        while heap[(value_index)//2] < value:
+            #Swap values
+            x = heap[(value_index)//2]
+            heap[(value_index) // 2] = value
+            heap[value_index] = x
+            value_index = (value_index)//2
+            if value_index == 1:
+                break
+    return heap
 
+def heap_delete_min_max(heap, min_heap):
+    #swap first and last + delete former root
+    heap[1] = heap[-1]
+    heap.pop()
+    #Now bubble down
+    root_index = 1
+    if min_heap == True:
+        try:
+            while heap[root_index] > heap[root_index*2] or heap[root_index] > heap[root_index*2+1]:
+                #swap with min of the two
+                if heap[root_index*2] < heap[root_index*2+1]:
+                    x = heap[root_index*2]
+                    heap[root_index*2] = heap[root_index]
+                    heap[root_index] = x
+                    root_index = 2*root_index
+                else:
+                    x = heap[root_index * 2+1]
+                    heap[root_index*2+1] = heap[root_index]
+                    heap[root_index] = x
+                    root_index = 2 * root_index +1
+        except:
+            if len(heap)%2 == 1:
+                #swap root index with final position
+                x = heap[root_index]
+                heap[root_index] = heap[-1]
+                heap[-1] = x
+    else:
+        try:
+            while heap[root_index] < heap[root_index*2] or heap[root_index] < heap[root_index*2+1]:
+                #swap with max of the two
+                if heap[root_index*2] < heap[root_index*2+1]:
+                    x = heap[root_index*2+1]
+                    heap[root_index*2 + 1] = heap[root_index]
+                    heap[root_index] = x
+                    root_index = 2*root_index +1
+                else:
+                    x = heap[root_index * 2]
+                    heap[root_index * 2] = heap[root_index]
+                    heap[root_index] = x
+                    root_index = 2 * root_index
+        except:
+            if len(heap)%2 == 1:
+                #swap root index with final position
+                x = heap[root_index]
+                heap[root_index] = heap[-1]
+                heap[-1] = x
+    return heap
+
+def rebalance_heap(heap_max,heap_min, count_max, count_min):
+    while count_max - count_min > 1 or count_max - count_min < 0:
+        if count_max > count_min:
+            #delete heap[0] from heap_max and insert it into heap_min
+
+            heap_min = heap_insert(heap_min, heap_max[1], count_min, True)
+            heap_max = heap_delete_min_max(heap_max, False)
+            count_min += 1
+            count_max -= 1
+        else:
+
+            heap_max = heap_insert(heap_max, heap_min[1], count_max, False)
+            heap_min = heap_delete_min_max(heap_min, True)
+            count_max += 1
+            count_min -= 1
+    return heap_max, heap_min, count_max, count_min
+def median_maintain(A):
+    #Create two heaps. One for mins and one for max's
+    if A[0] > A[1]:
+        heap_max = [0,A[1]]
+        heap_min = [0,A[0]]
+        sum_median = A[0] + A[1]
+    else:
+        heap_max = [0,A[0]]
+        heap_min = [0,A[1]]
+        sum_median = A[0] + A[0]
+    count_max = 2
+    count_min = 2
+    for value in A[2:]:
+        #determine which heap to add to.
+        if value < heap_max[1]:
+            heap_max = heap_insert(heap_max, value, count_max, False)
+            count_max += 1
+        elif value > heap_min[1]:
+            heap_min = heap_insert(heap_min, value, count_min, True)
+            count_min += 1
+        else:
+            heap_max = heap_insert(heap_max, value, count_max, False)
+            count_max += 1
+        #Maintain equal split by rebalancing
+        heap_max,heap_min,count_max,count_min = rebalance_heap(heap_max,heap_min,count_max, count_min)
+        sum_median += heap_max[1]
+    return sum_median
 import time
 start_time = time.time()
-x = ''
-for t in [7,37,59,82,99,115,133,165,188,197]:
-    x += str(dijkstra(1,t,200)[t])+','
-#x = dijkstra(1,37,200)
-print(x)
-x=''
-for t in [7,37,59,82,99,115,133,165,188,197]:
-    x += str(dijkstra(t,1,200)[1])+','
 
-print(x)
+with open("median_maintain.txt") as f:
+    A = [int(line.rstrip()) for line in f]
+#A = [6,5,4,3,2,1]
+#A = [1,666,10,667,100,2,3]
+#A = [1,2,3,4,5,6]
+#A = [6331,2793,1640,9290,225,625,6195,2303,5685,1354]
+#A = [3,2,4,1,5]
+print(median_maintain(A)%10000)
 
 print("--- %s seconds ---" % (time.time() - start_time))

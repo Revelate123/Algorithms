@@ -450,16 +450,33 @@ def median_maintain(A):
         heap_max,heap_min,count_max,count_min = rebalance_heap(heap_max,heap_min,count_max, count_min)
         sum_median += heap_max[1]
     return sum_median
+
+
+
+def two_sum(A):
+    count = set()
+    for bucket in A:
+        for x in A[bucket]:
+            for y in A[bucket]:
+                if abs(x+y) <= 10000 and x != y:
+                    z = x + y
+                    count.add(z)
+    return len(count)
+
+
+
 import time
 start_time = time.time()
+A = {}
+with open("two_sum.txt") as f:
+    for row in csv.reader(f, delimiter='\t'):
+        x = int(row[0])
+        if abs(x)//1000000 in A:
+            A[abs(x)//1000000] += [int(row[0])]
+        else:
+            A[abs(x)//1000000] = [int(row[0])]
 
-with open("median_maintain.txt") as f:
-    A = [int(line.rstrip()) for line in f]
-#A = [6,5,4,3,2,1]
-#A = [1,666,10,667,100,2,3]
-#A = [1,2,3,4,5,6]
-#A = [6331,2793,1640,9290,225,625,6195,2303,5685,1354]
-#A = [3,2,4,1,5]
-print(median_maintain(A)%10000)
+#A = {1:[-3,-1,1,2,9,11,7,6,2]}
+print(two_sum(A))
 
 print("--- %s seconds ---" % (time.time() - start_time))

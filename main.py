@@ -464,19 +464,70 @@ def two_sum(A):
     return len(count)
 
 
+def greedy_jobs(A):
+    #Extract minimum.
+    total = 0
+    current_length = 0
+    for i in range(len(A)-1):
+        #keep popping jobs until x[0] does not equal y[0]
+        x = heapq.heappop(A)
+        y = heapq.heappop(A)
+        while x[0] == y[0]:
+            if x[1] > y[1]:
+                #reisnert y
+                y1 = heapq.heappop(A)
+                heapq.heappush(A,y)
+                y = y1
+            else:
+                #reinsert x
+                y1 = heapq.heappop(A)
+                heapq.heappush(A,x)
+                x = y
+                y = y1
+        heapq.heappush(A,y)
+        current_length += x[2]
+        total += current_length*x[1]
+    x = heapq.heappop(A)
+    current_length += x[2]
+    total += current_length * x[1]
+    return total
+
+def greedy_jobs_2(A):
+    total = 0
+    current_length = 0
+    for i in range(len(A)):
+        x = heapq.heappop(A)
+        current_length += x[2]
+        total += current_length * x[1]
+    return total
+import heapq
+with open("greedy_jobs.txt") as f:
+    for row in csv.reader(f, delimiter=' '):
+        if len(row) == 1:
+            A = [0]*int(row[0])
+            count = 0
+        else:
+            A[count] = (-(int(row[0]) - int(row[1])), int(row[0]), int(row[1]))
+            count += 1
+heapq.heapify(A)
+
+
+with open("greedy_jobs.txt") as f:
+    for row in csv.reader(f, delimiter=' '):
+        if len(row) == 1:
+            B = [0]*int(row[0])
+            count = 0
+        else:
+            B[count] = (-int(row[0]) / int(row[1]), int(row[0]), int(row[1]))
+            count += 1
+heapq.heapify(B)
 
 import time
 start_time = time.time()
-A = {}
-with open("two_sum.txt") as f:
-    for row in csv.reader(f, delimiter='\t'):
-        x = int(row[0])
-        if abs(x)//1000000 in A:
-            A[abs(x)//1000000] += [int(row[0])]
-        else:
-            A[abs(x)//1000000] = [int(row[0])]
 
-#A = {1:[-3,-1,1,2,9,11,7,6,2]}
-print(two_sum(A))
+print(greedy_jobs(A))
+print(greedy_jobs_2(B))
+
+
 
 print("--- %s seconds ---" % (time.time() - start_time))

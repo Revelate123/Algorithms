@@ -467,29 +467,32 @@ def two_sum(A):
 def greedy_jobs(A):
     #Extract minimum.
     total = 0
+    count = 0
+    weight = 0
     current_length = 0
-    for i in range(len(A)-1):
+    length = len(A)
+    for i in range(length):
         #keep popping jobs until x[0] does not equal y[0]
         x = heapq.heappop(A)
-        y = heapq.heappop(A)
-        while x[0] == y[0]:
-            if x[1] > y[1]:
-                #reisnert y
-                y1 = heapq.heappop(A)
-                heapq.heappush(A,y)
-                y = y1
-            else:
-                #reinsert x
-                y1 = heapq.heappop(A)
-                heapq.heappush(A,x)
-                x = y
-                y = y1
-        heapq.heappush(A,y)
+        stack = [x]
+        if len(A) > 0:
+            while A[0][0]==x[0]:
+                x = heapq.heappop(A)
+                stack += [x]
+                if len(A) == 0:
+                    break
+        for i in stack:
+            if i[1] > weight:
+                x = i
         current_length += x[2]
-        total += current_length*x[1]
-    x = heapq.heappop(A)
-    current_length += x[2]
-    total += current_length * x[1]
+        total += current_length * x[1]
+        count += 1
+        mark = 0
+        for i in stack:
+            if i == x and mark == 0:
+               mark = 1
+            else:
+                heapq.heappush(A,i)
     return total
 
 def greedy_jobs_2(A):
@@ -500,33 +503,77 @@ def greedy_jobs_2(A):
         current_length += x[2]
         total += current_length * x[1]
     return total
+
+
+
+
 import heapq
-with open("greedy_jobs.txt") as f:
-    for row in csv.reader(f, delimiter=' '):
-        if len(row) == 1:
-            A = [0]*int(row[0])
-            count = 0
-        else:
-            A[count] = (-(int(row[0]) - int(row[1])), int(row[0]), int(row[1]))
-            count += 1
-heapq.heapify(A)
+def greedy_import_1():
+    with open("greedy_jobs.txt") as f:
+        for row in csv.reader(f, delimiter=' '):
+            if len(row) == 1:
+                A = [0]*int(row[0])
+                count = 0
+            else:
+                A[count] = (-(int(row[0]) - int(row[1])), int(row[0]), int(row[1]))
+                count += 1
+    heapq.heapify(A)
+    return A
 
+def greedy_import_2():
+    with open("greedy_jobs.txt") as f:
+        for row in csv.reader(f, delimiter=' '):
+            if len(row) == 1:
+                B = [0]*int(row[0])
+                count = 0
+            else:
+                B[count] = (-int(row[0]) / int(row[1]), int(row[0]), int(row[1]))
+                count += 1
+    heapq.heapify(B)
+    return B
 
-with open("greedy_jobs.txt") as f:
-    for row in csv.reader(f, delimiter=' '):
-        if len(row) == 1:
-            B = [0]*int(row[0])
-            count = 0
-        else:
-            B[count] = (-int(row[0]) / int(row[1]), int(row[0]), int(row[1]))
-            count += 1
-heapq.heapify(B)
+def prims_algo(A):
+    explored = set()
+    explored.add(1)
+    vertices = A[1]
+    total_length = 0
+    heapq.heapify(vertices)
+    while len(vertices) > 0:
+        x = heapq.heappop(vertices)
+        if x[1] not in explored:
+            explored.add(x[1])
+            try:
+                vertices += A[x[1]]
+                heapq.heapify(vertices)
+            except KeyError:
+                pass
+            total_length += x[0]
+    return total_length
+
+    #from stack check all things going from it:
+    #select minimum.
+
+def prim_input():
+    A = {}
+    with open("prims.txt") as f:
+        for row in csv.reader(f, delimiter=' '):
+            if len(row) > 2:
+                if int(row[0]) in A:
+                    A[int(row[0])] += [(int(row[2]),int(row[1]))]
+                else:
+                    A[int(row[0])] = [(int(row[2]),int(row[1]))]
+                if int(row[1]) in A:
+                    A[int(row[1])] += [(int(row[2]),int(row[0]))]
+                else:
+                    A[int(row[1])] = [(int(row[2]),int(row[0]))]
+    return A
 
 import time
 start_time = time.time()
 
-print(greedy_jobs(A))
-print(greedy_jobs_2(B))
+print(greedy_jobs(greedy_import_1()))
+print(greedy_jobs_2(greedy_import_2()))
+print(prims_algo(prim_input()))
 
 
 

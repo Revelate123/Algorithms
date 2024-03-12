@@ -571,10 +571,5 @@ def prim_input():
 import time
 start_time = time.time()
 
-print(greedy_jobs(greedy_import_1()))
-print(greedy_jobs_2(greedy_import_2()))
 print(prims_algo(prim_input()))
-
-
-
 print("--- %s seconds ---" % (time.time() - start_time))

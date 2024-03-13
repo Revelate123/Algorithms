@@ -568,8 +568,61 @@ def prim_input():
                     A[int(row[1])] = [(int(row[2]),int(row[0]))]
     return A
 
+def union(union_array,root_1,root_2):
+
+    union_array[root_1[0]][0] = root_2[0]
+
+    union_array[root_2[0]][1] += root_1[1]
+    c = union_array[root_2[0]][1]
+    return union_array
+def union_find(union_array, x):
+    #optionally, apply compression during union find.
+    marker = [x]
+    while marker[0] != union_array[marker[0]][0]:
+        marker = union_array[marker[0]]
+    c = union_array[marker[0]]
+    return union_array[marker[0]]
+def clustering(A, k):
+    num_nodes = 500
+    union_array = [[i,1] for i in range(num_nodes+1)]
+
+    #number of unions measures number of clusters
+    while num_nodes > k:
+        if num_nodes == 5:
+            pass
+        #extract min from heap.
+        minimum = heapq.heappop(A)
+        #check if nodes are in same cluster
+        root_1 = union_find(union_array,minimum[1])
+        root_2 = union_find(union_array,minimum[2])
+        if root_1 != root_2:
+            #Join them together
+            union_array = union(union_array,root_1,root_2)
+            num_nodes -= 1
+            final = minimum
+    x = []
+    for i in range(501):
+        if union_array[i][0] == i:
+            x += [union_array[i]]
+    return final
+def cluster_input():
+    with open("clustering_1.txt") as f:
+        count = 0
+        for row in csv.reader(f, delimiter=' '):
+            count += 1
+    with open("clustering_1.txt") as f:
+        for row in csv.reader(f, delimiter=' '):
+            if len(row) == 1:
+                B = [0]*(count-1)
+                count = 0
+            else:
+                B[count] = [int(row[2]), int(row[0]), int(row[1])]
+                count += 1
+    heapq.heapify(B)
+    return B
+
 import time
 start_time = time.time()
 
-print(prims_algo(prim_input()))
+print(clustering(cluster_input(),3))
 print("--- %s seconds ---" % (time.time() - start_time))

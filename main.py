@@ -674,10 +674,64 @@ def big_cluster_input():
                 count += 1
     return A
 
+def hoffman_input():
+    A = []
+    count = 1
+    with open("hoffman.txt") as f:
+        for row in f:
+            if count == 0:
+                count = 1
+            else:
+                A += [(int(row),1,0)]
+    heapq.heapify(A)
+    return A
+
+def hoffman(A):
+    #find two minimum weights and join them together.
+    #Their cluster is now their combined total weights.
+    for i in range(len(A)-1):
+        min_1 = heapq.heappop(A)
+        min_2 = heapq.heappop(A)
+
+        combined = (min_1[0] + min_2[0], 1+ max(min_1[1],min_2[1]), min(min_1[2],min_2[2]) + 1)
+        heapq.heappush(A,combined)
+    return A
+
+def maxw_is_input():
+    A = []
+    count = 0
+    with open("mwis.txt") as f:
+        for row in f:
+            if count == 0:
+                count = 1
+            else:
+                A += [int(row)]
+    return A
+
+def maxw_is(A):
+    #To calculate a max weight independent set where no two vertices are adjacent to one another.
+    # think about final set, either it includes
+    B = [0] * (len(A)+1)
+    C = [0] * (len(A)+1)
+    B[1] = A[0]
+    B[2] = A[1]
+    for i in range(2,len(A)):
+
+        B[i+1] = max(B[i-1]+ A[i], B[i])
+    for i in range(len(B)-1,2,-1):
+        if B[i-2] == B[i] - A[i-1]:
+            C[i] = 1
+        else:
+            C[i] = 0
+    return C
+
+
+
 
 import time
 start_time = time.time()
 
-#print(clustering(cluster_input(),3))
-print(big_cluster(big_cluster_input()))
+print(hoffman(hoffman_input()))
+print(maxw_is(maxw_is_input()))
+
 print("--- %s seconds ---" % (time.time() - start_time))

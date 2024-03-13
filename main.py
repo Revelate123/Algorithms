@@ -2,7 +2,7 @@ import random
 import csv
 import copy
 import sys
-
+import itertools
 
 def recursive_function(term1, term2):
     #Separate each term into 2 a,b,c,d
@@ -581,6 +581,11 @@ def union_find(union_array, x):
     while marker[0] != union_array[marker[0]][0]:
         marker = union_array[marker[0]]
     c = union_array[marker[0]]
+    marker_2 = [x]
+    while marker_2[0] != union_array[marker_2[0]][0]:
+        marker_3 = union_array[marker_2[0]]
+        union_array[marker_2[0]][0] = c[0]
+        marker_2 = marker_3
     return union_array[marker[0]]
 def clustering(A, k):
     num_nodes = 500
@@ -621,8 +626,58 @@ def cluster_input():
     heapq.heapify(B)
     return B
 
+def big_cluster(A):
+    num_nodes = 200000
+    clusters = len(A)
+    union_array = [[i,1] for i in range(num_nodes+1)]
+    #create bit masks for distance 1
+    bit_masks_1 = [1 << i for i in range(24)]
+    bit_masks_2 = []
+    for i in bit_masks_1:
+        for j in bit_masks_1:
+            bit_masks_2 += [i ^ j]
+    #iterate through all values in map
+    for i in A.keys():
+        for j in bit_masks_1:
+            if i ^ j in A:
+                #union i and A[i ^ j] if roots are different
+                root_1 = union_find(union_array, A[i])
+                root_2 = union_find(union_array, A[i ^ j])
+                if root_1 != root_2:
+                    # Join them together
+                    union_array = union(union_array, root_1, root_2)
+                    clusters -= 1
+
+        for j in bit_masks_2:
+            if i ^ j in A:
+                # union i and A[i ^ j] if roots are different
+                root_1 = union_find(union_array, A[i])
+                root_2 = union_find(union_array, A[i ^ j])
+                if root_1 != root_2:
+                    # Join them together
+                    union_array = union(union_array, root_1, root_2)
+                    clusters -= 1
+        #apply bit mask and check for match to node
+        #union those nodes if there is a match
+        #decrease number of clusters by 1
+    return clusters
+def big_cluster_input():
+    A = {}
+    count = -1
+    with open("clustering_big.txt") as f:
+        for row in f:
+            if count == -1:
+                count = 0
+            else:
+                row = row.replace(' ','')
+                A[int(row,2)] = count
+                count += 1
+    return A
+
+
 import time
 start_time = time.time()
 
-print(clustering(cluster_input(),3))
+#print(clustering(cluster_input(),3))
+print(big_cluster(big_cluster_input()))
 print("--- %s seconds ---" % (time.time() - start_time))

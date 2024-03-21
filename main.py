@@ -718,20 +718,58 @@ def maxw_is(A):
     for i in range(2,len(A)):
 
         B[i+1] = max(B[i-1]+ A[i], B[i])
-    for i in range(len(B)-1,2,-1):
+    i = len(B) - 1
+    while i > 1:
         if B[i-2] == B[i] - A[i-1]:
             C[i] = 1
+            i -= 2
         else:
             C[i] = 0
-    return C
+            i -= 1
+        if i <= 2:
+            if C[3] == 1:
+                C[1] = 1
+            else:
+                if B[1] > B[2]:
+                    C[1] = 1
+                else:
+                    C[2] = 1
+    return C[1],C[2],C[3],C[4],C[17], C[117],C[517], C[997]
 
 
+def knap_sack_input():
+    #Store in array of value, weight pairs
+    A = []
+    count = 0
+    with open("knapsack.txt") as f:
+        for row in csv.reader(f, delimiter=' '):
+            if count == 0:
+                W = int(row[0])
+                n = int(row[1])
+                count = 1
+            else:
+                A += [(int(row[0]), int(row[1]))]
+    return A, n, W
 
 
+def knap_sack(A,n,W):
+    # Problem can be broken up into taking the smaller sub problems
+    # The max weight W of the sub problem is found by subtracting the max weight of the current problem.
+    B = [[0]*W for i in range(n)]
+
+    for items in range(n):
+        for weight in range(W):
+            if A[items][1] <= weight:
+                #compare index of B[items-1][weight] and B[items-1][weight-A[current_weight]] + A{current_value]
+                B[items][weight] = max(B[items-1][weight], B[items-1][weight-A[items][1]] + A[items][0])
+            else:
+                B[items][weight] = B[items-1][weight]
+    return B
 import time
 start_time = time.time()
 
-print(hoffman(hoffman_input()))
-print(maxw_is(maxw_is_input()))
+A, n, W = knap_sack_input()
+
+print(knap_sack(A, n, W))
 
 print("--- %s seconds ---" % (time.time() - start_time))

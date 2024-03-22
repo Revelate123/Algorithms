@@ -741,7 +741,7 @@ def knap_sack_input():
     #Store in array of value, weight pairs
     A = []
     count = 0
-    with open("knapsack.txt") as f:
+    with open("knapsack_big.txt") as f:
         for row in csv.reader(f, delimiter=' '):
             if count == 0:
                 W = int(row[0])
@@ -764,12 +764,24 @@ def knap_sack(A,n,W):
                 B[items][weight] = max(B[items-1][weight], B[items-1][weight-A[items][1]] + A[items][0])
             else:
                 B[items][weight] = B[items-1][weight]
-    return B
+    return B[-1][-1]
+
+
+def knap_sack_big(A,n,W):
+    C = [0]*W
+    for items in range(n):
+        for weight in range(W-1, A[items][1]-1,-1):
+            C[weight] = max(C[weight],C[weight-A[items][1]] + A[items][0])
+    return C[-1]
+
+
 import time
 start_time = time.time()
 
 A, n, W = knap_sack_input()
 
-print(knap_sack(A, n, W))
-
+print(knap_sack_big(A, n, W))
 print("--- %s seconds ---" % (time.time() - start_time))
+#start_time = time.time()
+#print(knap_sack(A, n, W))
+#print("--- %s seconds ---" % (time.time() - start_time))

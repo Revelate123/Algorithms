@@ -304,9 +304,7 @@ def dijkstra_read_inputs():
                     G[int(row[0])] += [[int(j) for j in row[i].split(",")]]
             #G[int(row[0])] = [int(G[int(row[0])][i]) for i in range(len(G[int(row[0])]))]
     return G
-def dijkstra(s,t,num_nodes):
-
-    G = dijkstra_read_inputs()
+def dijkstra(G,s,t):
     #G = {1:[[2,1],[4,3]],2:[[3,3],[1,1],[4,1],[5,1]],4:[[3,2],[1,3],[2,1]],3:[[2,3],[4,2],[5,1]],5:[[2,1],[3,1]]}
     A = {s:0}
     B = {s:str(s)}
@@ -316,25 +314,19 @@ def dijkstra(s,t,num_nodes):
     greedy_score = 10000000
     end_node = 0
     start_node = 0
-    while t not in A:
+    for x in range(len(G)):
         for i in A:
-            if i == 112:
-                pass
-            if i == 26:
-                pass
             #check greedy scores of all i paths
-            for j in G[i]:
+            for j in G[i]: #Dont iterate through j's in A, G should get shorter.
                 if j[1] + A[i] < greedy_score and j[0] not in A: #Add to A
                     greedy_score = j[1] + A[i]
                     end_node = j[0]
                     start_node = i
-        if end_node == 18:
-            pass
         A[end_node] = greedy_score
         B[end_node] = B[start_node] +','+ str(end_node)
         #G[start_node] = [x for x in G[start_node] if x[0] != end_node]
         greedy_score = 10000000
-    return A
+    return min(A)
     #use Dijkstra greedy score to compute which vertex to add next
 
 def heap_insert(heap, value, value_index,min_heap):
@@ -775,12 +767,69 @@ def knap_sack_big(A,n,W):
     return C[-1]
 
 
+def bellman_ford_input():
+    # Store in array of value, weight pairs
+    A = []
+    count = 0
+    with open("g3.txt") as f:
+        for row in csv.reader(f, delimiter=' '):
+            if count == 0:
+                n = int(row[0])
+                count = 1
+            else:
+                A += [[int(row[0]), int(row[1]),int(row[2])]]
+    return A, n
+
+
+def bellman_ford(A, n,source_node):
+    #Initialise array to store weights
+    distance = [float("inf") for i in range(n+1)]
+    distance[source_node] = 0
+    #Outer loop repeats n - 1 times
+    for i in range(n - 1):
+        for w in A:
+            if distance[w[0]] + w[2] < distance[w[1]]:
+                distance[w[1]] = distance[w[0]] + w[2]
+    for w in A:
+        if distance[w[0]] + w[2] < distance[w[1]]:
+            return "Negative Cycle"
+    else:
+        return distance
+
+def johnson(A,n):
+    #First must add a new node s which points to every other node
+    for i in range(1,n+1):
+        A += [[0,i,0]]
+    #Run bellman ford
+    distance = bellman_ford(A,n,0)
+    #reweight all nodes
+    for i in range(len(A)):
+        A[i][2] = A[i][2] + distance[A[i][0]] - distance[A[i][1]]
+    #remove node s
+    B = {}
+    for i in range(len(A)):
+        if A[i][0] != 0:
+            if A[i][0] in B:
+                B[A[i][0]] += [[A[i][1],A[i][0]]]
+            else:
+                B[A[i][0]] = [[A[i][1], A[i][0]]]
+    #Run djikstra on every node needs format A = {start_node:[[end_node, weight],[end_node, weight]]}
+    shortest_path = 1000000
+    for s in range(1,n+1): #dijkstra finds shortest path to other nodes too don't stop dijkstra on target node, run until completed for all nodes.
+            start_time = time.time()
+            path = dijkstra(B,s,1)
+            print("--- %s seconds ---" % (time.time() - start_time))
+            if path < shortest_path:
+                shortest_path = path
+                s_final = s
+    return shortest_path #still need to reshift values
+
 import time
 start_time = time.time()
 
-A, n, W = knap_sack_input()
+A, n = bellman_ford_input()
 
-print(knap_sack_big(A, n, W))
+print(johnson(A,n))
 print("--- %s seconds ---" % (time.time() - start_time))
 #start_time = time.time()
 #print(knap_sack(A, n, W))

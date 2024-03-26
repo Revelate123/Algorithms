@@ -304,6 +304,23 @@ def dijkstra_read_inputs():
                     G[int(row[0])] += [[int(j) for j in row[i].split(",")]]
             #G[int(row[0])] = [int(G[int(row[0])][i]) for i in range(len(G[int(row[0])]))]
     return G
+
+def dijkstra_optimised(G,s,num_nodes):
+    #Create priority queue with priority
+    Q = [(0,s)]
+    heapq.heapify(Q)
+    dist = [float("inf") for i in range(num_nodes+1)]
+    dist[s] = 0
+    while Q:
+        u = heapq.heappop(Q)
+        if u[1] in G:
+            for j in G[u[1]]:
+                x = dist[u[1]] + j[1]
+                if x < dist[j[0]]:
+                    dist[j[0]] = x
+                    heapq.heappush(Q, (x,j[0]))
+    return dist
+
 def dijkstra(G,s,t):
     #G = {1:[[2,1],[4,3]],2:[[3,3],[1,1],[4,1],[5,1]],4:[[3,2],[1,3],[2,1]],3:[[2,3],[4,2],[5,1]],5:[[2,1],[3,1]]}
     A = {s:0}
@@ -326,7 +343,7 @@ def dijkstra(G,s,t):
         B[end_node] = B[start_node] +','+ str(end_node)
         #G[start_node] = [x for x in G[start_node] if x[0] != end_node]
         greedy_score = 10000000
-    return min(A)
+    return A
     #use Dijkstra greedy score to compute which vertex to add next
 
 def heap_insert(heap, value, value_index,min_heap):
@@ -811,19 +828,20 @@ def johnson(A,n):
     for i in range(len(A)):
         if A[i][0] != 0:
             if A[i][0] in B:
-                B[A[i][0]] += [[A[i][1],A[i][0]]]
+                B[A[i][0]] += [[A[i][1],A[i][2]]]
             else:
-                B[A[i][0]] = [[A[i][1], A[i][0]]]
+                B[A[i][0]] = [[A[i][1], A[i][2]]]
     #Run djikstra on every node needs format A = {start_node:[[end_node, weight],[end_node, weight]]}
-    shortest_path = 1000000
+    shortest_path = [0]*(n+1)
     for s in range(1,n+1): #dijkstra finds shortest path to other nodes too don't stop dijkstra on target node, run until completed for all nodes.
-            start_time = time.time()
-            path = dijkstra(B,s,1)
-            print("--- %s seconds ---" % (time.time() - start_time))
-            if path < shortest_path:
-                shortest_path = path
-                s_final = s
-    return shortest_path #still need to reshift values
+            shortest_path[s] = dijkstra_optimised(B, s,n)
+    for i in range(1,len(shortest_path)):
+        for j in range(1,len(shortest_path)):
+            shortest_path[i][j] += -distance[i] + distance[j]
+            if i == j:
+                shortest_path[i][j] = float("inf")
+        shortest_path[i] = min(shortest_path[i])
+    return min(shortest_path) #still need to reshift values
 
 import time
 start_time = time.time()

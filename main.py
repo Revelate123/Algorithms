@@ -355,6 +355,7 @@ def heap_delete_min_max(heap, min_heap):
     #swap first and last + delete former root
     heap[1] = heap[-1]
     heap.pop()
+
     #Now bubble down
     root_index = 1
     if min_heap == True:

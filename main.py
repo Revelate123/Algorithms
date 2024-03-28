@@ -843,12 +843,25 @@ def johnson(A,n):
         shortest_path[i] = min(shortest_path[i])
     return min(shortest_path) #still need to reshift values
 
+
+def tsp_input():
+    #Create as distance matrix.
+
+
+def tsp(num_nodes):
+    #This algorithm works by calculating the minimum path which goes through all nodes in the set once. For all combinations of sets of size m
+    #The first group of sets will be of length 1. Therefore, we are only marking the distance from the start node to every other node.
+    #The sub problems of each set S will be e.g. Set = (2,3,4,5) then dist(1 to 5) will be min answer of Set = (2,3,4) + dist(1 to last node).
+    #Requires me storing answers to all sub problems from previous set + knowing what the last node was? No store as g(target, Subset)
+    #g will need to be size
+    for i in range(num_nodes):
+    pass
+
+
+
 import time
 start_time = time.time()
 
-A, n = bellman_ford_input()
-
-print(johnson(A,n))
 print("--- %s seconds ---" % (time.time() - start_time))
 #start_time = time.time()
 #print(knap_sack(A, n, W))
